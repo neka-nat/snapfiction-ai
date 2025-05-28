@@ -2,6 +2,15 @@
 
 This is an AI agent that generates a short story movie from a prompt.
 
+## Requirements
+
+- Python 3.12
+- Google ADK
+- Gemini on Vertex AI
+- Google Cloud Storage
+- Imagen (Image Generation)
+- Lyria (Music Generation)
+- Veo (Video Generation)
 
 ## Setup
 
@@ -11,7 +20,7 @@ uv sync
 
 ### Google Cloud
 
-This application uses Google Cloud Storage to store images and videos.
+This application uses Google Cloud Storage to store videos.
 
 First, you need to create a bucket.
 Second, you need to add the service account(cloud-lvm-video-server@prod.google.com) to the bucket.

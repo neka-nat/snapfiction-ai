@@ -3,25 +3,24 @@ import tempfile
 import uuid
 
 from moviepy.editor import VideoFileClip, concatenate_videoclips
+from google.adk.tools.tool_context import ToolContext
 
-from .utils.storage import download_video
 
-
-async def merge_videos(video_uris: list[str]) -> str:
+async def merge_videos(video_ids: list[str], tool_context: ToolContext) -> str:
     """
     Merge videos into a single video.
 
     Args:
-        video_uris: The URIs of the videos to merge.
+        video_ids: The IDs of the videos to merge.
 
     Returns:
         The path of the merged video.
     """
     tempfile_paths = []
-    for video_uri in video_uris:
-        video_bytes = download_video(video_uri)
+    for video_id in video_ids:
+        video_artifact = await tool_context.load_artifact(filename=video_id)
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            temp_file.write(video_bytes)
+            temp_file.write(video_artifact.inline_data.data)
             tempfile_paths.append(temp_file.name)
     output_path = f"generated_video_{uuid.uuid4()}.mp4"
 
@@ -30,4 +29,4 @@ async def merge_videos(video_uris: list[str]) -> str:
     final_video.write_videofile(output_path)
     for tempfile_path in tempfile_paths:
         os.remove(tempfile_path)
-    return output_path
+    return os.path.abspath(output_path)

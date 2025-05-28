@@ -1,21 +1,25 @@
 import os
 import time
 import tempfile
+import uuid
 
 from google import genai
-from google.genai.types import GenerateVideosConfig, Image
+from google.adk.tools.tool_context import ToolContext
+from google.genai.types import Blob, GenerateVideosConfig, Image, Part
 from loguru import logger
 
 from .utils.movie_utils import extract_last_frame
-from .utils.storage import download_video, upload_image
+from .utils.storage import download_video
+
 
 _model_name = "veo-2.0-generate-001"
 
 
 async def generate_video(
     prompt: str,
-    image_uri: str,
-    aspect_ratio: str = "16:9",
+    image_id: str,
+    aspect_ratio: str,
+    tool_context: ToolContext,
 ) -> dict[str, str]:
     """
     Generate a video from a prompt and image.
@@ -23,20 +27,22 @@ async def generate_video(
 
     Args:
         prompt: The prompt to generate the video from.
-        image_uri: The URI of the image to generate the video from.
-        aspect_ratio: The aspect ratio of the video.
+        image_id: The ID of the image to generate the video from.
+        aspect_ratio: The aspect ratio of the video (e.g. "16:9", "9:16").
 
     Returns:
         The URI of the generated video.
     """
 
     video_output_uri = f"gs://{os.environ['GOOGLE_STORAGE_BUCKET_NAME']}/videos"
+    image_artifact = await tool_context.load_artifact(filename=image_id)
+    logger.info(f"Loaded image artifact: {image_artifact}")
 
     client = genai.Client()
     operation = client.models.generate_videos(
         model=_model_name,
         prompt=prompt,
-        image=Image(gcs_uri=image_uri, mime_type="image/png"),
+        image=Image(image_bytes=image_artifact.inline_data.data, mime_type="image/png"),
         config=GenerateVideosConfig(
             aspect_ratio=aspect_ratio,
             output_gcs_uri=video_output_uri,
@@ -55,12 +61,26 @@ async def generate_video(
             temp_file.write(video_bytes)
             temp_file_path = temp_file.name
             last_frame = extract_last_frame(temp_file_path)
-        target_blob_name = os.path.dirname(video_uri) + "/last_frame.png"
-        image_uri = upload_image(last_frame, target_blob_name)
+        media_id = uuid.uuid4()
+        video_id = f"video_{media_id}.mp4"
+        await tool_context.save_artifact(
+            filename=video_id,
+            artifact=Part(
+                inline_data=Blob(data=video_bytes, mime_type="video/mp4"),
+            ),
+        )
+        last_frame_id = f"last_frame_{media_id}.png"
+        await tool_context.save_artifact(
+            filename=last_frame_id,
+            artifact=Part(
+                inline_data=Blob(data=last_frame, mime_type="image/png"),
+            ),
+        )
+        logger.info(f"Added video artifact: {video_id}")
         return {
             "status": "success",
-            "video_uri": video_uri,
-            "last_frame_uri": image_uri,
+            "video_id": video_id,
+            "last_frame_id": last_frame_id,
         }
     else:
         return {

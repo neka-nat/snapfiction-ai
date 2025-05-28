@@ -20,7 +20,7 @@ async def generate_image(prompt: str, aspect_ratio: str, tool_context: ToolConte
         aspect_ratio: The aspect ratio of the image (e.g. "1:1", "16:9", "9:16").
 
     Returns:
-        The URI of the generated image.
+        The ID of the generated image.
     """
 
     vertexai.init()

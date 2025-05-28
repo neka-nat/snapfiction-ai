@@ -12,6 +12,7 @@ from .utils.movie_utils import extract_last_frame
 from .utils.storage import download_video
 
 
+# _model_name = "veo-3.0-generate-preview"
 _model_name = "veo-2.0-generate-001"
 
 
@@ -31,7 +32,7 @@ async def generate_video(
         aspect_ratio: The aspect ratio of the video (e.g. "16:9", "9:16").
 
     Returns:
-        The URI of the generated video.
+        The ID of the generated video.
     """
 
     video_output_uri = f"gs://{os.environ['GOOGLE_STORAGE_BUCKET_NAME']}/videos"
@@ -54,7 +55,7 @@ async def generate_video(
         operation = client.operations.get(operation)
         logger.info(operation)
 
-    if operation.response:
+    if operation.response and operation.result.generated_videos:
         video_uri = operation.result.generated_videos[0].video.uri
         video_bytes = download_video(video_uri)
         with tempfile.NamedTemporaryFile(delete=True) as temp_file:

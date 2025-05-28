@@ -3,6 +3,7 @@ from google.adk.agents import LlmAgent
 
 from .image_generation_tool import generate_image
 from .merge_tool import merge_videos
+from .music_generation_tool import generate_music
 from .video_generation_tool import generate_video
 
 
@@ -23,6 +24,7 @@ instruction = """
     "title": "<動画のタイトル>",
     "theme": "<動画のテーマ>",
     "mood": "<動画の雰囲気>",
+    "aspect_ratio": "<動画のアスペクト比(e.g. 16:9, 9:16, 1:1, ...)>",
   },
   "bgm": {
     "prompt": "<BGM生成用のプロンプト(英語)>",
@@ -83,6 +85,7 @@ root_agent = LlmAgent(
     tools=[
         generate_image,
         generate_video,
+        generate_music,
         merge_videos,
     ],
 )

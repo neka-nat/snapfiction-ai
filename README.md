@@ -2,6 +2,16 @@
 
 This is an AI agent that generates a short story movie from a prompt.
 
+## Demo
+https://github.com/user-attachments/assets/b31ccf3b-58d8-4dcb-8db4-9e186759ac50
+
+https://github.com/user-attachments/assets/22b7388e-aac7-4cf9-beb1-3c6a52159ef4
+
+https://github.com/user-attachments/assets/f0b2a3cc-faa4-40ae-9875-06f3c116f83d
+
+https://github.com/user-attachments/assets/f1a1f795-cf09-4ffb-927e-678d6c428e5b
+
+
 ## Requirements
 
 - Python 3.12

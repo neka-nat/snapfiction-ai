@@ -49,9 +49,8 @@ async def generate_music(prompt: str, tool_context: ToolContext) -> dict[str, st
         music_id = f"music_{uuid.uuid4()}.mp3"
         await tool_context.save_artifact(
             filename=music_id,
-            artifact=types.Part.from_bytes(
-                data=mp3_bytes.getvalue(),
-                mime_type="audio/mp3"
+            artifact=types.Part(
+                inline_data=types.Blob(data=mp3_bytes.getvalue(), mime_type="audio/mp3"),
             ),
         )
 
